@@ -2,7 +2,7 @@
 <extension key="org.varl.volmatch" type="module">
   <file>volmatch</file>
   <name>Volunteer Arlington Volunteer Matching</name>
-  <description>Functions for match recommendations for volunteers. Includes API to retrieve mathes and a mailing job to send to volunteers.</description>
+  <description>Functions for match recommendations for volunteers. Includes API to retrieve matches and a job to create mailings to send recommendations to volunteers.</description>
   <license>Copyright Leadership Center for Excellence</license>
   <maintainer>
     <author>Ginkgo Street Labs</author>
