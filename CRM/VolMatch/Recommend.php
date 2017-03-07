@@ -168,7 +168,6 @@ class CRM_VolMatch_Recommend {
 
     $needSQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses($availabilitySql['WHERES'], $interestsSQL['WHERES'], 'AND');
 
-    CRM_ComposeQL_SQLUtil::debugComposeQLQuery($needSQL);
     return CRM_ComposeQL_DAO::fetchSelectQuery($needSQL);
   }
 
