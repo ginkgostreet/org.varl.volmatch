@@ -82,7 +82,7 @@ class CRM_VolMatch_Recommend {
   }
 
   static function getProjectsByImpactAreaSQL($areas) {
-    $impactSchema = CRM_ComposeQL_APIUtil::getCustomFieldSchema('Primary_Impact_Area');
+    $impactSchema = CRM_ComposeQL_APIUtil::getCustomFieldSchema('organization_information', 'Primary_Impact_Area');
     $tblOrgInformation = $impactSchema['custom_group']['table_name'];
     $fldImpactArea = $impactSchema['column_name'];
     $beneficiaryRelationshipType = civicrm_api3('OptionValue', 'getValue',
@@ -126,15 +126,14 @@ class CRM_VolMatch_Recommend {
   public static function recommendedNeeds($cid, $dates = NULL) {
 
 //   * filter Orgs by Interests/Impacts
-//    $schemaImpact = APIUtil::getCustomFieldSchema('Primary_Impact_Area');
-    $schemaInterests = CRM_ComposeQL_APIUtil::getCustomFieldSchema('Interests');
+    $schemaInterests = CRM_ComposeQL_APIUtil::getCustomFieldSchema('volunteer_information', 'Interests');
 
     $interests = civicrm_api3('Contact', 'getValue', array(
       'return' => 'custom_'.$schemaInterests['id'],
       'contact_id' => $cid,
     ));
 
-    $lkpAvailability = CRM_ComposeQL_APIUtil::getCustomFieldSchema('availability');
+    $lkpAvailability = CRM_ComposeQL_APIUtil::getCustomFieldSchema('volunteer_information', 'availability');
 
     $result = civicrm_api3('Contact', 'getValue', array(
       'sequential' => 0,
@@ -147,7 +146,6 @@ class CRM_VolMatch_Recommend {
     }
 
     $availabilitySql = self::getNeedsByAvailabilitySQL($availability);
-
     $interestsSQL = self::getProjectsByImpactAreaSQL($interests);
 
     $needSQL['SELECTS'] = array_merge_recursive($availabilitySql['SELECTS'], $interestsSQL['SELECTS']);
@@ -166,7 +164,13 @@ class CRM_VolMatch_Recommend {
       ))
       );
 
-    $needSQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses($availabilitySql['WHERES'], $interestsSQL['WHERES'], 'AND');
+    if (!isset($interestsSQL['WHERES'])) {
+      $interestsSQL['WHERES'] = array();
+    }
+
+    $needSQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses(
+      $availabilitySql['WHERES'], $interestsSQL['WHERES'], 'AND'
+    );
 
     return CRM_ComposeQL_DAO::fetchSelectQuery($needSQL);
   }
