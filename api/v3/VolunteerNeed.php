@@ -26,11 +26,11 @@ function _civicrm_api3_volunteer_need_getrecommended_spec(&$spec) {
  */
 function civicrm_api3_volunteer_need_getrecommended($params) {
 
-  return $returnValues = CRM_VolMatch_Recommend::recommendedNeeds(
+  $returnValues = CRM_VolMatch_Recommend::recommendedNeeds(
     $params['contact_id'],
     array(CRM_Utils_Array::value('start_date', $params), CRM_Utils_Array::value('end_date', $params))
-    );
+  );
    // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
-//  return civicrm_api3_create_success($returnValues, $params, 'NeedSearch', 'getRecommended');
+  return civicrm_api3_create_success($returnValues, $params, 'NeedSearch', 'getRecommended');
 
 }
