@@ -270,6 +270,6 @@ class CRM_VolMatch_Recommend {
 
     $needSQL['WHERES'][] = CRM_VolMatch_Util::whereNeedIsNotSetShift();
 
-    Civi::log()->debug('recommendedNeedsAnyTime::SQL::'.CRM_ComposeQL_SQLUtil::debugComposeQLQuery($needSQL));
     return CRM_ComposeQL_DAO::fetchSelectQuery($needSQL);
   }
+}
