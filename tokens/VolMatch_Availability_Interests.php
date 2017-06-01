@@ -243,7 +243,7 @@ function _volmatch_volunteerLinks() {
   $skillsHref = CRM_Utils_System::url('civicrm/profile/edit', $skillsQS, TRUE);
   $skillsLink = sprintf($fmtAhref, $skillsHref, '', 'skills and interests');
 
-  $profileQS = '&reset=1gid=18'.$checksum;
+  $profileQS = '&reset=1&gid=18'.$checksum;
   $profileHref = CRM_Utils_System::url('civicrm/profile/edit', $profileQS, TRUE);;
   $profileLink = sprintf($fmtAhref, $profileHref, '', 'volunteer profile');
 
