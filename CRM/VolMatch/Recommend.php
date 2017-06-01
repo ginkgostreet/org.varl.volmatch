@@ -240,7 +240,6 @@ class CRM_VolMatch_Recommend {
    */
   public static function recommendedNeeds($cid, $limit=NULL, $dates=array()) {
     $needSQL = self::recommendedNeedsSQL($cid, $limit, $dates);
-    Civi::log()->debug('recommendedNeeds::SQL::'.CRM_ComposeQL_SQLUtil::debugComposeQLQuery($needSQL));
     return CRM_ComposeQL_DAO::fetchSelectQuery($needSQL);
   }
 
