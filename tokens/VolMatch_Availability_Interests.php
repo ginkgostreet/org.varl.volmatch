@@ -170,15 +170,19 @@ function _volmatch_formatInfo(&$needs) {
         break;
       case 'flexible':
       default:
+        $start = ''; $end = '';
+
         if (!empty($need['start_time'])) {
           $start = date_create($need['start_time']);
+          $start = 'after '.$start->format('M j, Y');
         }
         if (!empty($need['end_time'])) {
           $end = date_create($need['end_time']);
+          $end = ' until '.$end->format('M j, Y');
         }
 
         $need['info'] .= sprintf($fmtHeading, 'Anytime:')
-        . sprintf($fmtInfo, $start->format('M j, Y').' - '.$end->format('M j, Y'))
+        . sprintf($fmtInfo, $start.$end)
         ;
 
         if (!empty($need['duration'])) {
