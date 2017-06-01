@@ -59,7 +59,6 @@ function civicrm_api3_volunteer_need_getrecommended($params) {
   $limit = (empty($params['options'])) ? NULL : CRM_Utils_Array::value('limit', $params['options']);
 
   $type = CRM_Utils_Array::value('type', $params);
-  Civi::log()->debug("API'ing for type: {$type}");
 
   switch (strtoupper($type)) {
     case 'THIS_WEEK':
