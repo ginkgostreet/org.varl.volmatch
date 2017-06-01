@@ -2,6 +2,20 @@
 
 require_once 'volmatch.civix.php';
 
+require_once 'tokens/VolMatch_Availability_Interests.php';
+
+function volmatch_civicrm_tokens(&$tokens) {
+  $tokens['volmatch'] = array(
+    'volmatch.Interest' => 'VolMatch: Match on Interests AND Availability',
+    'volmatch.ThisWeek' => 'VolMatch: Set-Shifts This Week',
+    'volmatch.AnyTime' => 'VolMatch: Non-Set-Shifts',
+    'volmatch.ProfileUrl' => 'VolMatch: Volunteer Profile URL',
+    'volmatch.SkillsUrl' => 'VolMatch: Volunteer Skills Etc URL',
+    'volmatch.ProfileLink' => 'VolMatch: Volunteer Profile Link',
+    'volmatch.SkillsLink' => 'VolMatch: Volunteer Skills Etc Link',
+  );
+}
+
 /**
  * Implements hook_civicrm_config().
  *
