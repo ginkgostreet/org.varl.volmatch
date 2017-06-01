@@ -1,11 +1,7 @@
 <?php
 
-//namespace Varl\VolMatch;
-
-//use GSL\ComposeQL\APIUtil;
-
 class CRM_VolMatch_Util {
- /**
+  /**
    * Given an array of field names,
    * use metadata to pair fields that share the same option group.
    *
@@ -58,52 +54,94 @@ class CRM_VolMatch_Util {
 
 //  SET SHIFT
 // duration IS NOT NULL AND end_time IS NULL
+
 */
 
-/**
- * SET SHIFT
- * duration IS NOT NULL AND end_time IS NULL
- */
+  /**
+   * SET SHIFT
+   * duration IS NOT NULL AND end_time IS NULL
+   * @return Array SQL-Where Fragment
+   */
   static function whereNeedIsSetShift() {
-    return array('WHERES' => array(
+    return array( 'paren' => 'AND',
       array( 'field' => '`civicrm_volunteer_need`.`duration`', 'comp' => 'IS NOT NULL'),
       array( 'field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => 'IS NULL')
-    ));
+    );
   }
 
-/**
- * DAYOFWEEK( n.start_time) NOT IN (1,7) -- weekdays
- */
+  /**
+   * Exclude Set-Shifts
+   * @return Array SQL-Where Fragment
+   */
+  static function whereNeedIsNotSetShift() {
+    return array( 'paren' => 'AND',
+      array( 'field' => '`civicrm_volunteer_need`.`duration`', 'comp' => 'IS NULL'),
+      array( 'field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => 'IS NOT NULL')
+    );
+  }
+
+  /**
+   * Weekdays :: DAYOFWEEK( n.start_time) NOT IN (1,7)
+   * @return Array SQL-Where Fragment
+   */
   static function whereNeedIsWeekday() {
-    return array('WHERES' => array(
+    return array(array(
       'DAYOFWEEK( `civicrm_volunteer_need`.`start_time` ) NOT in (1,7)'
     ));
   }
-/**
- * DAYOFWEEK( n.start_time ) in (1,7) -- weekends
- */
+
+  /**
+   * Weekends :: DAYOFWEEK( n.start_time ) in (1,7)
+   * @return Array SQL-Where Fragment
+   */
   static function whereNeedIsWeekend() {
-    return array(
+    return array(array(
       'DAYOFWEEK( `civicrm_volunteer_need`.`start_time` ) in (1,7)'
-    );
+    ));
   }
-/**
- * HOUR (n.start_time) > 4 --evening
- */
+  /**
+   * Evenings :: HOUR (n.start_time) > 4
+   * @return Array SQL-Where Fragment
+   */
   static function whereNeedIsEvening() {
-    return array(
+    return array(array(
       'HOUR( `civicrm_volunteer_need`.`start_time` ) > 4'
-    );
+    ));
   }
-  static function whereNeedIsNotPassed() {
-    return array(
+
+  /**
+   * Needs that have not ended.
+   * @return Array SQL-Where Fragment
+   */
+  static function whereNeedIsNotPast() {
+    return
+      array(
         array('field' => '`civicrm_volunteer_need`.`is_active`','value' => 1, 'type' => 'Integer'),
         array('paren' => 'AND',
+          // FLEX TIME
           array('field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => '> NOW()'),
-          array('conj' => 'OR', '`civicrm_volunteer_need`.`end_time` IS NULL')
+          // FLEXIBLE NEED
+          array('conj' => 'OR', 'field' => '`civicrm_volunteer_need`.`is_flexible`', 'value'=> 1),
+          //  SET SHIFT
+          array('conj' => 'OR', 'DATE(`civicrm_volunteer_need`.`start_time`) >= CURRENT_DATE()'),
+          array('paren' => 'OR',
+             // OPEN-ENDED
+            array('`civicrm_volunteer_need`.`duration` IS NULL'),
+            array('DATE(`civicrm_volunteer_need`.`start_time`) < CURRENT_DATE()'),
+            array('paren' => 'AND',
+            // filter case that should not have existed: start, end but duration NULL
+              array('field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => 'IS NULL'),
+              array('conj' => 'OR', 'field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => '> NOW()'),
+            ),
+          ),
         ),
-    );
+      );
   }
-
-
+  /**
+   * Needs with start-time this week (8 days)
+   * @return Array SQL-Where Fragment
+   */
+  static function whereNeedIsThisWeek() {
+    return array('field' => '`civicrm_volunteer_need`.`start_time`', 'comp' =>'> DATE_ADD(NOW(), INTERVAL 8 DAY)');
+  }
 }
