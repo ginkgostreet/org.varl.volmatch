@@ -128,14 +128,14 @@ function _volmatch_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
 }
 
 /**
- * @return CRM_Volmatch_Upgrader
+ * @return Civi_Volmatch_Upgrader
  */
 function _volmatch_civix_upgrader() {
-  if (!file_exists(__DIR__ . '/CRM/Volmatch/Upgrader.php')) {
+  if (!file_exists(__DIR__ . '/Civi/Volmatch/Upgrader.php')) {
     return NULL;
   }
   else {
-    return CRM_Volmatch_Upgrader_Base::instance();
+    return Civi_Volmatch_Upgrader_Base::instance();
   }
 }
 
@@ -193,6 +193,9 @@ function _volmatch_civix_civicrm_managed(&$entities) {
         $e['module'] = 'org.varl.volmatch';
       }
       $entities[] = $e;
+      if (empty($e['params']['version'])) {
+        $e['params']['version'] = '3';
+      }
     }
   }
 }
@@ -293,7 +296,7 @@ function _volmatch_civix_insert_navigation_menu(&$menu, $path, $item) {
     $first = array_shift($path);
     foreach ($menu as $key => &$entry) {
       if ($entry['attributes']['name'] == $first) {
-        if (!$entry['child']) {
+        if (!isset($entry['child'])) {
           $entry['child'] = array();
         }
         $found = _volmatch_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
