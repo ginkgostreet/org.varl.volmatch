@@ -32,6 +32,14 @@ function _civicrm_api3_match_mail_Create_spec(&$spec) {
     'description' => 'From Email of mailing',
     'title' => 'Mailing From Email',
   );
+  // Note the mailing API has a parameter scheduled_date which is not
+  // strtotime()-parseable. It seems more confusing to use the same name and have
+  // different behavior than to add a new param.
+  $spec['send_date'] = array(
+    'api.default' => 'now',
+    'description' => 'Date and time to schedule this mailing. Can be relative and should be strtotime()-parseable.',
+    'title' => 'Mailing Scheduled Date',
+  );
   $spec['subject'] = array(
     'api.default' => 'Volunteer opportunities in and around Arlington this week',
     'description' => 'Subject of mailing',
@@ -61,7 +69,13 @@ function _civicrm_api3_match_mail_Create_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_match_mail_Create($params) {
-  civicrm_api3('Mailing', 'create', array(
+  $scheduledTimestamp = strtotime($params['send_date']);
+  if ($scheduledTimestamp === FALSE) {
+    throw new CiviCRM_API3_Exception('Could not parse send_date.', 'invalid_format', array($params['send_date']));
+  }
+  $scheduledDate = date('Y-m-d H:i:s', $scheduledTimestamp);
+
+  return civicrm_api3('Mailing', 'create', array(
     'created_id' => $params['created_id'],
     'name' => $params['name'],
     'mailing_type' => 'standalone',
@@ -73,6 +87,7 @@ function civicrm_api3_match_mail_Create($params) {
     'auto_responder' => 0,
     'open_tracking' => 1,
     'msg_template_id' => $params['msg_template_id'],
+    'scheduled_date' => $scheduledDate,
     'visibility' => 'User and User Admin Only',
     'dedupe_email' => 1,
     'email_selection_method' => 'automatic',
