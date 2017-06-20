@@ -97,6 +97,8 @@ function civicrm_api3_match_mail_Create($params) {
     'auto_responder' => 0,
     'open_tracking' => 1,
     'msg_template_id' => $params['msg_template_id'],
+    'header_id' => '',
+    'footer_id' => '',
     'scheduled_date' => $scheduledDate,
     'visibility' => 'User and User Admin Only',
     'dedupe_email' => 1,
