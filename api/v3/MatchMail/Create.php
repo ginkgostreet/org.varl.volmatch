@@ -18,7 +18,7 @@ function _civicrm_api3_match_mail_Create_spec(&$spec) {
     'FKApiName' => 'Contact',
   );
   $spec['name'] = array(
-    'api.default' => 'Weekly Volunteer Match ' . date('Y-m-d'),
+    'api.default' => 'Weekly Volunteer Match',
     'description' => 'Mailing Name (used in backend interfaces only)',
     'title' => 'Mailing Name',
   );
