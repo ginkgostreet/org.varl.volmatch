@@ -46,7 +46,7 @@ function _civicrm_api3_match_mail_Create_spec(&$spec) {
     'title' => 'Subject',
   );
   $spec['msg_template_id'] = array(
-    'api.default' => /* TODO API lookup */70,
+    'api.default' => 70,
     'description' => 'FK to the message template',
     'title' => 'Mailing Message Template',
   );
@@ -75,6 +75,16 @@ function civicrm_api3_match_mail_Create($params) {
   }
   $scheduledDate = date('Y-m-d H:i:s', $scheduledTimestamp);
 
+  try {
+    $bodyHtml = civicrm_api3('MessageTemplate', 'getvalue', array(
+      'id' => $params['msg_template_id'],
+      'return' => 'msg_html',
+    ));
+  }
+  catch (Exception $ex) {
+    throw new CiviCRM_API3_Exception('Could not retrieve message content.', 'invalid_msg_template_id', array($params['msg_template_id']), $ex);
+  }
+
   return civicrm_api3('Mailing', 'create', array(
     'created_id' => $params['created_id'],
     'name' => $params['name'],
@@ -82,7 +92,7 @@ function civicrm_api3_match_mail_Create($params) {
     'from_name' => $params['from_name'],
     'from_email' => $params['from_email'],
     'subject' => $params['subject'],
-//    'body_html' => "Maybe unnecessary if the template does the lifting?",
+    'body_html' => $bodyHtml,
     'url_tracking' => 1,
     'auto_responder' => 0,
     'open_tracking' => 1,
