@@ -97,6 +97,8 @@ function civicrm_api3_match_mail_Create($params) {
     'auto_responder' => 0,
     'open_tracking' => 1,
     'msg_template_id' => $params['msg_template_id'],
+    'header_id' => '',
+    'footer_id' => '',
     'scheduled_date' => $scheduledDate,
     'visibility' => 'User and User Admin Only',
     'dedupe_email' => 1,
@@ -105,6 +107,13 @@ function civicrm_api3_match_mail_Create($params) {
       'entity_id' => $params['target_group'],
       'entity_table' => 'civicrm_group',
       'group_type' => 'Include',
+    ),
+    // Submit the mailing after creating it; without this, the UI will report
+    // that the mail is targeted at group X, but the intended recipienets will
+    // number 0; the submit API is apparently responsible for building the
+    // recipient list.
+    'api.Mailing.submit' => array(
+      'scheduled_date' => $scheduledDate,
     ),
   ));
 }
