@@ -20,13 +20,13 @@ return array (
       'run_frequency' => 'Daily',
       'api_entity' => 'MatchMail',
       'api_action' => 'Create',
-      'parameters' => "created_id=[contact ID] - optional (defaults to cron user)\n"
-              . "name=[mailing name used in backend UIs] - optional (defaults to 'Weekly Volunteer Match')\n"
-              . "from_name=[from header] - optional (defaults to 'Volunteer Arlington')\n"
+      'parameters' => "created_id=[ID] - optional (default: cron user)\n"
+              . "name=[backend UIs] - optional (default: Weekly Volunteer Match)\n"
+              . "from_name=[from header] - optional (default: Volunteer Arlington)\n"
               . "from_email=[from email] - optional (defaults to 'volarl@volunteerarlington.org')\n"
-              . "send_date=[strtotime()-parseable time to schedule mailing] - optional (defaults to 'now')\n"
-              . "subject=[email subject] - optional (defaults to 'Volunteer opportunities in and around Arlington this week')\n"
-              . "msg_template_id=[ID of messageTemplate to use as msg body] - optional (defaults to 70)\n"
+              . "send_date=[strtotime()-parseable time to schedule mailing] - optional (default: now)\n"
+              . "subject=[email subject] - optional (default: Volunteer opportunities in and around Arlington this week)\n"
+              . "msg_template_id=[ID of messageTemplate to use as msg body] - optional (default: 70)\n"
               . "target_group=[ID of group to send mail to] - required\n",
     ),
   ),
