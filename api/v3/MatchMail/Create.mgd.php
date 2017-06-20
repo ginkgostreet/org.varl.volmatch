@@ -13,10 +13,10 @@ return array (
       'version' => 3,
       'is_active' => 0,
       'name' => 'Queue Match Notification Mailings',
-      'description' => 'Schedules match notification emails. Queued mailings will not be
-              delivered until Send Scheduled Mailings job runs. Recommended: leave this
-              job disabled to keep the parameter doc handy; create new jobs using the
-              same API to accommodate whatever schedules are needed.',
+      'description' => 'Queued mailings will not be delivered until Send Scheduled '
+              . 'Mailings job runs. Recommended: leave this job disabled to keep the '
+              . 'parameter doc handy; create new jobs using the same API to accommodate '
+              . 'whatever schedules are needed.',
       'run_frequency' => 'Daily',
       'api_entity' => 'MatchMail',
       'api_action' => 'Create',
