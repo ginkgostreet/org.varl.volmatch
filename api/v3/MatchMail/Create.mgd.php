@@ -11,12 +11,23 @@ return array (
     'params' => 
     array (
       'version' => 3,
-      'name' => 'Call MatchMail.Create API',
-      'description' => 'Call MatchMail.Create API',
+      'is_active' => 0,
+      'name' => 'Queue Match Notification Mailings',
+      'description' => 'Schedules match notification emails. Queued mailings will not be
+              delivered until Send Scheduled Mailings job runs. Recommended: leave this
+              job disabled to keep the parameter doc handy; create new jobs using the
+              same API to accommodate whatever schedules are needed.',
       'run_frequency' => 'Daily',
       'api_entity' => 'MatchMail',
       'api_action' => 'Create',
-      'parameters' => '',
+      'parameters' => "created_id=[contact ID] - optional (defaults to cron user)\n"
+              . "name=[mailing name used in backend UIs] - optional (defaults to 'Weekly Volunteer Match')\n"
+              . "from_name=[from header] - optional (defaults to 'Volunteer Arlington')\n"
+              . "from_email=[from email] - optional (defaults to 'volarl@volunteerarlington.org')\n"
+              . "send_date=[strtotime()-parseable time to schedule mailing] - optional (defaults to 'now')\n"
+              . "subject=[email subject] - optional (defaults to 'Volunteer opportunities in and around Arlington this week')\n"
+              . "msg_template_id=[ID of messageTemplate to use as msg body] - optional (defaults to 70)\n"
+              . "target_group=[ID of group to send mail to] - required\n",
     ),
   ),
 );
