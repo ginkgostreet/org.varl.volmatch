@@ -151,18 +151,13 @@ class CRM_VolMatch_Recommend {
   }
 
   /**
-   * Recommend Needs for Contact SQL
-   * @param  int $cid   contact ID
+   * All Volunteer Needs by interest and availability of this contact.
+   * @param  int $cid   contact_id
    * @param  int $limit number to return
-   * @param  array $dates array('start_date'=> ... 'end_date'=> ...)
-   * @return array        ComposeQL Query Array
+
+   * @return array    ComposeQL DAO result array
    */
-  public static function recommendedNeedsSQL($cid, $limit=NULL, $dates=NULL) {
-
-    if (isset($dates['start_date']) || isset($dates['end_date'])){
-      throw new CRM_Exception('recommendedNeeds, filter by date not implemented yet.');
-    }
-
+  public static function recommendedNeeds($cid, $limit=NULL) {
     $availabilitySQL = NULL;
     $interestsSQL = NULL;
     $availability = array();
@@ -228,18 +223,7 @@ class CRM_VolMatch_Recommend {
     if (isset($limit)) {
       $needSQL['APPEND'] = "LIMIT $limit";
     }
-    return $needSQL;
-  }
 
-  /**
-   * All Volunteer Needs by interest and availability of this contact.
-   * @param  int $cid   contact_id
-   * @param  int $limit number to return
-   * @param  array  $dates array('start_date' => .. 'end_date' => ..)
-   * @return array    ComposeQL DAO result array
-   */
-  public static function recommendedNeeds($cid, $limit=NULL, $dates=array()) {
-    $needSQL = self::recommendedNeedsSQL($cid, $limit, $dates);
     return CRM_ComposeQL_DAO::fetchSelectQuery($needSQL);
   }
 
@@ -250,7 +234,71 @@ class CRM_VolMatch_Recommend {
    * @return array        ComposeQL DAO result array
    */
   public static function recommendedNeedsThisWeek($cid, $limit=NULL) {
-    $needSQL = self::recommendedNeedsSQL($cid, $limit);
+    $availabilitySQL = NULL;
+    $interestsSQL = NULL;
+    $availability = array();
+    $interests = array();
+
+//   * filter Orgs by Interests/Impacts
+    $schemaInterests = CRM_ComposeQL_APIUtil::getCustomFieldSchema('volunteer_information', 'Interests');
+
+    $interests = civicrm_api3('Contact', 'getValue', array(
+      'return' => 'custom_'.$schemaInterests['id'],
+      'contact_id' => $cid,
+    ));
+
+    $lkpAvailability = CRM_ComposeQL_APIUtil::getCustomFieldSchema('volunteer_information', 'availability');
+
+    $result = civicrm_api3('Contact', 'getValue', array(
+      'sequential' => 0,
+      'return' => $lkpAvailability['api_column_name'],
+      'contact_id' => $cid
+    ));
+
+    if (!empty($result)) {
+      foreach($result as $avail) {
+        $availability[$avail] = $lkpAvailability['option_group']['options'][$avail];
+      }
+    }
+
+    $availabilitySQL = self::getNeedsByAvailabilitySQL($availability);
+    $interestsSQL = self::getProjectsByImpactAreaSQL($interests);
+
+    $needSQL['SELECTS'] = array_merge_recursive(
+      $availabilitySQL['SELECTS'],
+      $interestsSQL['SELECTS'],
+      array('civicrm_volunteer_project' => array('description'))
+     );
+
+    $needSQL['JOINS'] = array_merge(
+      $interestsSQL['JOINS'],
+      array(array(
+          'join' => 'INNER JOIN',
+          'right' => 'civicrm_volunteer_project',
+          'on' => '`civicrm_volunteer_project`.`id` = `civicrm_volunteer_project_contact`.`project_id`'
+      )),
+      array(array(
+        'join' => 'INNER JOIN',
+        'right' => 'civicrm_volunteer_need',
+        'on' => 'civicrm_volunteer_need.project_id = civicrm_volunteer_project.id',
+      ))
+      );
+
+    if (!isset($interestsSQL['WHERES'])) {
+      $interestsSQL['WHERES'] = array();
+    }
+
+    $needSQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses(
+      $availabilitySQL['WHERES'],
+      $interestsSQL['WHERES'],
+      'AND');
+
+    $needSQL['WHERES'][] = 'civicrm_volunteer_project.is_active = 1';
+    $needSQL['ORDER_BYS'] = array('civicrm_volunteer_need.last_updated DESC');
+
+    if (isset($limit)) {
+      $needSQL['APPEND'] = "LIMIT $limit";
+    }
 
     $needSQL['WHERES'][] = CRM_VolMatch_Util::whereNeedIsSetShift();
     $needSQL['WHERES'][] = CRM_VolMatch_Util::whereNeedIsThisWeek();
@@ -265,9 +313,54 @@ class CRM_VolMatch_Recommend {
    * @return array        ComposeQL DAO result array
    */
   public static function recommendedNeedsAnyTime($cid, $limit=NULL) {
-    $needSQL = self::recommendedNeedsSQL($cid, $limit);
+    $interestsSQL = NULL;
+    $interests = array();
 
+//   * filter Orgs by Interests/Impacts
+    $schemaInterests = CRM_ComposeQL_APIUtil::getCustomFieldSchema('volunteer_information', 'Interests');
+
+    $interests = civicrm_api3('Contact', 'getValue', array(
+      'return' => 'custom_'.$schemaInterests['id'],
+      'contact_id' => $cid,
+    ));
+
+    $interestsSQL = self::getProjectsByImpactAreaSQL($interests);
+
+    $needSQL['SELECTS'] = array_merge_recursive(
+      $interestsSQL['SELECTS'],
+      array('civicrm_volunteer_project' => array('description'))
+     );
+
+    $needSQL['JOINS'] = array_merge(
+      $interestsSQL['JOINS'],
+      array(array(
+          'join' => 'INNER JOIN',
+          'right' => 'civicrm_volunteer_project',
+          'on' => '`civicrm_volunteer_project`.`id` = `civicrm_volunteer_project_contact`.`project_id`'
+      )),
+      array(array(
+        'join' => 'INNER JOIN',
+        'right' => 'civicrm_volunteer_need',
+        'on' => 'civicrm_volunteer_need.project_id = civicrm_volunteer_project.id',
+      ))
+      );
+
+    if (!isset($interestsSQL['WHERES'])) {
+      $interestsSQL['WHERES'] = array();
+    }
+
+    $needSQL['WHERES'] = $interestsSQL['WHERES'];
+
+    $needSQL['WHERES'][] = 'civicrm_volunteer_project.is_active = 1';
+
+    // Definitive filter for "AnyTime"; above is essentially boilerplate.
     $needSQL['WHERES'][] = CRM_VolMatch_Util::whereNeedIsNotSetShift();
+
+    $needSQL['ORDER_BYS'] = array('civicrm_volunteer_need.last_updated DESC');
+
+    if (isset($limit)) {
+      $needSQL['APPEND'] = "LIMIT $limit";
+    }
 
     return CRM_ComposeQL_DAO::fetchSelectQuery($needSQL);
   }
