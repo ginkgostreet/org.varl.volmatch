@@ -165,8 +165,8 @@ class CRM_VolMatch_Recommend {
 
     $availabilitySQL = NULL;
     $interestsSQL = NULL;
-    $availability = NULL;
-    $interests = NULL;
+    $availability = array();
+    $interests = array();
 
 //   * filter Orgs by Interests/Impacts
     $schemaInterests = CRM_ComposeQL_APIUtil::getCustomFieldSchema('volunteer_information', 'Interests');

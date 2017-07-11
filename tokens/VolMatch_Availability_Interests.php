@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * Need Description truncate length in tokens.
+ */
+if (!defined('SUMMARY_LENGTH')) {
+  define('SUMMARY_LENGTH', 150);
+}
+
 /**
  * Implements hook_civicrm_tokenValues
  * to render volunteer match recommendations.
@@ -104,7 +112,6 @@ function _volmatch_constructRecommendations($values) {
 }
 
 function _volmatch_formatDescription(&$needs) {
-  define('SUMMARY_LENGTH', 150);
   $fmtAhref = '<a href="%s" %s>%s</a>';
 
   foreach($needs as &$need) {
@@ -135,6 +142,9 @@ function _volmatch_formatInfo(&$needs) {
   $fmtInfo = '<span style="'.$emailStyles['info_text'].'">%s</span><br />';
 
   foreach($needs as &$need) {
+    if (!isset($need['info'])) {
+      $need['info'] = '';
+    }
     $flex = _volmatch_flexibility($need);
     $need['info'] .= sprintf($fmtHeading, 'With:');
     $need['info'] .= sprintf($fmtInfo, $need['beneficiary']);
@@ -213,6 +223,7 @@ function _volmatch_formatNeedsAsHtmlTable($needs, $fields=NULL) {
 
   $fmtRow = '<tr>%s</tr>';
   $fmtCell = '<td>%s</td>';
+  $cells = '';
   foreach ($needs as $need) {
     unset($cells);
     if ($fields) {
