@@ -142,6 +142,6 @@ class CRM_VolMatch_Util {
    * @return Array SQL-Where Fragment
    */
   static function whereNeedIsThisWeek() {
-    return array('field' => '`civicrm_volunteer_need`.`start_time`', 'comp' =>'> DATE_ADD(NOW(), INTERVAL 8 DAY)');
+    return array('field' => '`civicrm_volunteer_need`.`start_time`', 'comp' =>'< DATE_ADD(NOW(), INTERVAL 8 DAY)');
   }
 }
