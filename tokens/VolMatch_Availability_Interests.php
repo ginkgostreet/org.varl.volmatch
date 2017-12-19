@@ -125,7 +125,7 @@ function _volmatch_formatDescription(&$needs) {
     $sign_up = sprintf($fmtAhref,
       $signUpUrl,
       'class="need_link"',
-      'Sign-up Now->'
+      'Learn More'
     );
     $need['description'] = $title;
     $need['description'] .= $description.'<br />'.$sign_up;
