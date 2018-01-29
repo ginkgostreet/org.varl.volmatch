@@ -115,7 +115,8 @@ function _volmatch_formatDescription(&$needs) {
   $fmtAhref = '<a href="%s" %s>%s</a>';
 
   foreach($needs as &$need) {
-    $description = substr($need['description'], 0, SUMMARY_LENGTH);
+    $description = strip_tags($need['description']); // remove html
+    $description = substr($description, 0, SUMMARY_LENGTH);
     $signUpUrl = _volmatch_volunteerNeedSignUpUrl($need);
     $title = sprintf( $fmtAhref,
       $signUpUrl,
