@@ -148,7 +148,7 @@ function _volmatch_formatInfo(&$needs) {
     }
     $flex = _volmatch_flexibility($need);
     $need['info'] .= sprintf($fmtHeading, 'With:');
-    $need['info'] .= sprintf($fmtInfo, $need['beneficiary']);
+    $need['info'] .= sprintf($fmtInfo, CRM_Utils_Array::value('beneficiary', $need));
 
     switch (_volmatch_flexibility($need)) {
       case 'set':
@@ -224,9 +224,8 @@ function _volmatch_formatNeedsAsHtmlTable($needs, $fields=NULL) {
 
   $fmtRow = '<tr>%s</tr>';
   $fmtCell = '<td>%s</td>';
-  $cells = '';
   foreach ($needs as $need) {
-    unset($cells);
+    $cells = '';
     if ($fields) {
       foreach ($fields as $field) {
         $cells .= sprintf($fmtCell, $need[$field]);
