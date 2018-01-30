@@ -102,10 +102,9 @@ class CRM_VolMatch_Recommend {
    * @return array        ComposeQL Query Array
    */
   static function getProjectsByImpactAreaSQL($areas=array()) {
-    if (is_null($areas)) {
-      throw new Exception('no areas provided to CRM_VolMatch_Recommend::getProjectsByImpactAreaSQL()');
+    if (!is_array($areas)) {
+      $areas = array();
     }
-
     $impactSchema = CRM_ComposeQL_APIUtil::getCustomFieldSchema('organization_information', 'Primary_Impact_Area');
     $tblOrgInformation = $impactSchema['custom_group']['table_name'];
     $fldImpactArea = $impactSchema['column_name'];
