@@ -73,7 +73,7 @@ function civicrm_api3_match_mail_Create($params) {
   if ($scheduledTimestamp === FALSE) {
     throw new CiviCRM_API3_Exception('Could not parse send_date.', 'invalid_format', array($params['send_date']));
   }
-  $scheduledDate = date('Y-m-d H:i:s', $scheduledTimestamp);
+  $scheduledDate = date('YmdHis', $scheduledTimestamp);
 
   try {
     $bodyHtml = civicrm_api3('MessageTemplate', 'getvalue', array(
