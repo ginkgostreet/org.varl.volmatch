@@ -136,7 +136,7 @@ class CRM_VolMatch_Recommend {
     $areaWheres = array();
     foreach ($areas as $area) {
       $areaWheres[] = array('conj' => 'OR',
-        'field' => "{$tblOrgInformation}.{$fldImpactArea}", 'value' => $area);
+        'field' => "{$tblOrgInformation}.{$fldImpactArea}", 'value' => '%'.CRM_Core_DAO::VALUE_SEPARATOR.$area.CRM_Core_DAO::VALUE_SEPARATOR.'%', 'comp' => 'LIKE');
     }
     $where[] = array_merge(array('paren' => 'AND'), $areaWheres);
 
