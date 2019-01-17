@@ -74,10 +74,7 @@ class CRM_VolMatch_Util {
    * @return Array SQL-Where Fragment
    */
   static function whereNeedIsNotSetShift() {
-    return array( 'paren' => 'AND',
-      array( 'field' => '`civicrm_volunteer_need`.`duration`', 'comp' => 'IS NULL'),
-      array( 'field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => 'IS NOT NULL')
-    );
+    return array( 'field' => '`civicrm_volunteer_need`.`duration`', 'comp' => 'IS NULL');
   }
 
   /**
@@ -111,6 +108,9 @@ class CRM_VolMatch_Util {
 
   /**
    * Needs that have not ended.
+   * TODO: WARNING: apparently this causes errors if not utilized with CRM_ComposeQL_SQLUtil::composeWhereClauses()
+   * e.g. - $SQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses($needSQL['WHERES'], CRM_VolMatch_Util::whereNeedIsNotPast(), 'AND');
+   *
    * @return Array SQL-Where Fragment
    */
   static function whereNeedIsNotPast() {

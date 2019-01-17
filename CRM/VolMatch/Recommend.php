@@ -331,8 +331,11 @@ class CRM_VolMatch_Recommend {
      )),
      array('civicrm_volunteer_project' => array(
        'title', 'id as `project_id`', 'description'
-     )));
-
+     )),
+     array('orgs' => array(
+       'id as `beneficiary_id`', '`display_name` as `beneficiary`'
+     ))
+    );
 
     $needSQL['JOINS'] = array_merge(
       $interestsSQL['JOINS'],
@@ -356,12 +359,11 @@ class CRM_VolMatch_Recommend {
 
     $needSQL['WHERES'][] = 'civicrm_volunteer_project.is_active = 1';
 
-    $needSQL['WHERES'][] =
-    CRM_ComposeQL_SQLUtil::composeWhereClauses(
-      CRM_VolMatch_Util::whereNeedIsNotPast(),
-        // Definitive filter for "AnyTime"; above is essentially boilerplate.
-        CRM_VolMatch_Util::whereNeedIsNotSetShift()
-    );
+    $needSQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses($needSQL['WHERES'], CRM_VolMatch_Util::whereNeedIsNotPast(), 'AND');
+
+    // Definitive filter for "AnyTime"; above is essentially boilerplate.
+    $needSQL['WHERES'][] = CRM_VolMatch_Util::whereNeedIsNotSetShift();
+
 
     $needSQL['ORDER_BYS'] = array('civicrm_volunteer_need.last_updated DESC');
 
