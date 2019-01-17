@@ -74,10 +74,7 @@ class CRM_VolMatch_Util {
    * @return Array SQL-Where Fragment
    */
   static function whereNeedIsNotSetShift() {
-    return array( 'paren' => 'AND',
-      array( 'field' => '`civicrm_volunteer_need`.`duration`', 'comp' => 'IS NULL'),
-      array( 'field' => '`civicrm_volunteer_need`.`end_time`', 'comp' => 'IS NOT NULL')
-    );
+    return array( 'field' => '`civicrm_volunteer_need`.`duration`', 'comp' => 'IS NULL');
   }
 
   /**
