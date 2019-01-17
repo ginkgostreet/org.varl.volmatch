@@ -331,8 +331,11 @@ class CRM_VolMatch_Recommend {
      )),
      array('civicrm_volunteer_project' => array(
        'title', 'id as `project_id`', 'description'
-     )));
-
+     )),
+     array('orgs' => array(
+       'id as `beneficiary_id`', '`display_name` as `beneficiary`'
+     ))
+    );
 
     $needSQL['JOINS'] = array_merge(
       $interestsSQL['JOINS'],
