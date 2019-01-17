@@ -108,6 +108,9 @@ class CRM_VolMatch_Util {
 
   /**
    * Needs that have not ended.
+   * TODO: WARNING: apparently this causes errors if not utilized with CRM_ComposeQL_SQLUtil::composeWhereClauses()
+   * e.g. - $SQL['WHERES'] = CRM_ComposeQL_SQLUtil::composeWhereClauses($needSQL['WHERES'], CRM_VolMatch_Util::whereNeedIsNotPast(), 'AND');
+   *
    * @return Array SQL-Where Fragment
    */
   static function whereNeedIsNotPast() {
