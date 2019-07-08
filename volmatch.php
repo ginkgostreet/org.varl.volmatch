@@ -13,6 +13,7 @@ function volmatch_civicrm_tokens(&$tokens) {
     'volmatch.SkillsUrl' => 'VolMatch: Volunteer Skills Etc URL',
     'volmatch.ProfileLink' => 'VolMatch: Volunteer Profile Link',
     'volmatch.SkillsLink' => 'VolMatch: Volunteer Skills Etc Link',
+    'volmatch.MatchAppeal' => 'VolMatch: Match Volunteer Appeal',
   );
 }
 
