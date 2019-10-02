@@ -57,20 +57,7 @@ function civicrm_api3_volunteer_appeal_getrecommended($params) {
 
   $limit = (empty($params['options'])) ? NULL : CRM_Utils_Array::value('limit', $params['options']);
 
-  $type = CRM_Utils_Array::value('type', $params);
-
-  switch (strtoupper($type)) {
-    case 'THIS_WEEK':
-      $returnValues = CRM_VolMatch_RecommendAppeal::recommendedNeedsThisWeek($params['contact_id'], $limit);
-      break;
-    case 'ANY_TIME':
-      $returnValues = CRM_VolMatch_RecommendAppeal::recommendedNeedsAnyTime($params['contact_id'], $limit);
-      break;
-    case 'INTEREST':
-    default:
-      $returnValues = CRM_VolMatch_RecommendAppeal::recommendedNeeds($params['contact_id'], $limit, $dates);
-      break;
-  }
+  $returnValues = CRM_VolMatch_RecommendAppeal::recommendedInterests($params['contact_id'], $limit, $dates);
 
   // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
   return civicrm_api3_create_success($returnValues, $params, 'NeedSearch', 'getRecommended');
