@@ -1,3 +1,51 @@
+## Match Tokens
+
+In the template editor, start typing "vol" in the token selector and you will see several tokens with the prefix, "VolMatch:".
+
+#### MatchAppeal
+
+Match based on Opportunities(Appeals). This is currently the only match-token to use the new Opportunity (Appeal) entity.
+
+#### ThisWeek
+
+Opportunities happening in the next week
+
+#### AnyTime
+
+Opportunities that can be done any-time
+
+#### Interest
+
+Match based on interests/area of impact
+
+#### ProfileUrl
+
+Return the URL for the volunteer's profile. Especially used for text-only emails.
+
+#### ProfileLink
+
+Similar to the ProfileURL, but returns a full HTML link
+
+#### SkillsUrl
+
+The URL for a volunteer to update their skills and interests. Especially used for text-only emails.
+
+#### SkillsLink
+
+Similar to the Profile URL, but returns a full HTML link.
+
+
+
+## Match API's
+
+Their are now two API methods that will provide suggested opportunities.
+
+The difference is the entity that is used to match with the volunteer.
+
+The original API is `VolunteerNeed.getrecommended` which uses Shifts(Needs) and especially Project fields to make recommendations.
+
+The newer API is `VolunteerAppeal.getrecommended` which uses the new Opportunity(Appeal) entity to make recommendations
+
 
 
 ## Queue Match Notification Mailing Scheduled Job Parameter Reference
