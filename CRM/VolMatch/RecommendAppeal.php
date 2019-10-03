@@ -56,10 +56,24 @@ class CRM_VolMatch_RecommendAppeal {
       . ' AND `civicrm_volunteer_project_contact`.`relationship_type_id` = '. $beneficiaryRelationshipType
     );
 
-    $where = array(array(
+    $where = array(
+      array(
       'field' => '`projects`.`is_active`',
       'value' => 1,
-    ));
+      ),
+      array(
+        'field' => '`appeals`.`is_appeal_active`',
+        'value' => 1,
+      ),
+      array(
+        'field' => '`appeals`.`active_fromdate`',
+        'comp' => '< NOW()'
+      ),
+      array(
+        'field' => '`appeals`.`active_todate`',
+        'comp' => '> NOW()'
+      )
+    );
 
     $areaWheres = array();
     foreach ($areas as $area) {
