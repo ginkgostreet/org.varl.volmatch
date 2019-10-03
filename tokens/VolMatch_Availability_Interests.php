@@ -26,6 +26,7 @@ function volmatch_civicrm_tokenValues(&$values, $cids, $job=null, $tokens=array(
     $volmatch_profile_checksum_qs = sprintf('&cs=%s&id=%s', $cs, $cid);
 
     foreach ($tokens['volmatch'] as $token => $nunya) {
+      unset($type);
       switch ($token) {
         case 'MatchAppeal':
           $type = 'MATCH_APPEAL';
@@ -61,29 +62,34 @@ function volmatch_civicrm_tokenValues(&$values, $cids, $job=null, $tokens=array(
           // break switch and continue next token:
           continue 2;
       }
-      // If Match Appeal Token is set then get recommended appeal for that specific contact.
-      if(isset($type) && $type="MATCH_APPEAL") {
-        $recommends = civicrm_api3('VolunteerAppeal', 'getrecommended',
+
+      if (isset($type)) {
+        $entity = ($type == "MATCH_APPEAL") ? 
+          'VolunteerAppeal' : 'VolunteerNeed';
+        
+        $recommends = civicrm_api3($entity, 'getrecommended',
           array(
             'contact_id' => $cid,
             'type' => $type,
-            'options' => array('limit' => 5)
-          )
-        );
-      } else {
-        $recommends = civicrm_api3('VolunteerNeed', 'getrecommended',
-          array(
-            'contact_id' => $cid,
-            'type' => $type,
-            'options' => array('limit' => 5)
+            'options' => array('limit' => 6)
           )
         );
       }
-      $values[$cid]["volmatch.{$token}"] =
-        ( !count($recommends) || $recommends['is_error'] == 1 || $recommends['count'] == 0 )
-        ? _volmatch_noResultsMessage($type)
-        : _volmatch_constructRecommendations($recommends['values'])
-      ;
+
+      if  ( !count($recommends) || $recommends['is_error'] == 1 || $recommends['count'] == 0 ) {
+        $output = _volmatch_noResultsMessage($type);
+      } else {
+        _volmatch_formatDescriptions($recommends['values']);
+        _volmatch_formatInfo($recommends['values']);
+
+        $fields = array(
+          'info',
+          'description',
+        );
+
+        $output = _volmatch_formatNeedsAsHtmlTable($recommends['values'], $fields);
+      }
+      $values[$cid]["volmatch.{$token}"] = $output;
     }
   }
 }
@@ -109,46 +115,53 @@ function _volmatch_noResultsMessage($type) {
   return $msg;
 }
 
-function _volmatch_constructRecommendations($values) {
-  _volmatch_formatDescription($values);
-  _volmatch_formatInfo($values);
+/**
+ * Sets description along with title and sign-up
+ *
+ * @param Array $opps by reference
+ * @return void
+ */
+function _volmatch_formatDescriptions(&$opps) {
 
-  $fields = array(
-    'info',
-    'description',
-  );
+  foreach($opps as &$opp) {
+    if( !empty($opp['appeal_teaser']) ) {
+      $description = $opp['appeal_teaser'];
+    } else {
+      $description = $opp['description'];
+    }
 
-  return _volmatch_formatNeedsAsHtmlTable($values, $fields);
+    if (isset($opp['appeal_title'])) {
+      $opp['title'] = $opp['appeal_title'];
+      $signUpUrl = _volmatch_opportunitySignUpUrl($opp);
+    } else {
+      $signUpUrl = _volmatch_volunteerNeedSignUpUrl($opp);
+    }
+    
+    $opp['sign-up'] = sprintf( '<a href="%s" %s>%s</a>', 
+      $signUpUrl, 'class="need_link"', 'Learn More'
+    );
+
+    _volmatch_formatTitle($opp);
+
+    // remove html and truncate:
+    $description = substr(strip_tags($description), 0, SUMMARY_LENGTH);     
+    $opp['description'] = $opp['title'].$description.'<br />'.$opp['sign-up'];
+  }
 }
 
-function _volmatch_formatDescription(&$needs) {
+function _volmatch_formatTitle(&$opp) {
   $fmtAhref = '<a href="%s" %s>%s</a>';
-
-  foreach($needs as &$need) {
-    $description = strip_tags($need['description']); // remove html
-    $description = substr($description, 0, SUMMARY_LENGTH);
-    $signUpUrl = _volmatch_volunteerNeedSignUpUrl($need);
-    // If Appeal data comes then use appeal data instead of need data.
-    // Below code executes when "MatchAppeal" token used.
-    if(isset($need['appeal_title'])) {
-      // Set Appeal title.
-      $need['title'] = $need['appeal_title'];
-      // Prepare Appeal redirect url.
-      $signUpUrl = _volmatch_volunteerAppealUrl($need);
-    }
-    $title = sprintf( $fmtAhref,
-      $signUpUrl,
-      'class="need_link"',
-      sprintf('<h2 class="need_title">%s</h2>', $need['title'])
-    );
-    $sign_up = sprintf($fmtAhref,
-      $signUpUrl,
-      'class="need_link"',
-      'Learn More'
-    );
-    $need['description'] = $title;
-    $need['description'] .= $description.'<br />'.$sign_up;
+  if(isset($opp['appeal_title'])) {
+    $opp['title'] = $opp['appeal_title'];
+    $signUpUrl = _volmatch_opportunitySignUpUrl($opp);
+  } else { // Needs
+    $signUpUrl = _volmatch_volunteerNeedSignUpUrl($opp);
   }
+  
+  $opp['title'] = sprintf('<h2 class="need_title">%s</h2>', $opp['title']);
+  $opp['title'] = sprintf( $fmtAhref, 
+    $signUpUrl, 'class="need_link"', $opp['title']
+  );
 }
 
 function _volmatch_formatInfo(&$needs) {
@@ -164,11 +177,14 @@ function _volmatch_formatInfo(&$needs) {
     if (!isset($need['info'])) {
       $need['info'] = '';
     }
-    $flex = _volmatch_flexibility($need);
     $need['info'] .= sprintf($fmtHeading, 'With:');
     $need['info'] .= sprintf($fmtInfo, CRM_Utils_Array::value('beneficiary', $need));
 
-    switch (_volmatch_flexibility($need)) {
+    $flex = _volmatch_flexibility($need);
+    if ( isset($need['appeal_id'])) {
+      $flex = 'appeal'; // disable flexiblity display
+    }
+    switch ($flex) {
       case 'set':
         $start = date_create($need['start_time']);
         $duration = date_interval_create_from_date_string($need['duration'].' minutes');
@@ -198,7 +214,6 @@ function _volmatch_formatInfo(&$needs) {
         ;
         break;
       case 'flexible':
-      default:
         $start = ''; $end = '';
 
         if (!empty($need['start_time'])) {
@@ -293,7 +308,7 @@ function _volmatch_urlWithLoginRedirect($request) {
 
 /**
  * Emailable URL to sign-up for a particular need.
- * Ensures user is logged-in by _volmatch_volunteerNeedSignUpUrl().
+ * Ensures user is logged-in by _volmatch_urlWithLoginRedirect().
  * @param  array $need volunteer need
  * @return string       fully-qualified url
  */
@@ -306,22 +321,30 @@ function _volmatch_volunteerNeedSignUpUrl($need) {
 }
 
 /**
+ * Emailable URL to sign-up for a particular Appeal.
+ * Ensures user is logged-in by _volmatch_volunteerNeedSignUpUrl().
+ * @param  array $need volunteer need
+ * @return string       fully-qualified url
+ */
+function _volmatch_opportunitySignUpUrl($opp) {
+  return _volmatch_urlWithLoginRedirect(
+    _volmatch_volunteerAppealUrl($opp)
+  );
+}
+
+/**
  * Emailable URL to appeal detail page for particular appeal.
  * @param  array $need volunteer need
  * @return string fully-qualified url
  */
-function _volmatch_volunteerAppealUrl($need) {
-  $appeal_id = $need['appeal_id'];
-
-  $appeal_url = CRM_Utils_System::url('civicrm/vol/',
+function _volmatch_volunteerAppealUrl($opp) {
+  return  CRM_Utils_System::url('civicrm/vol/',
     NULL, // query string
     FALSE, // absolute?
-    "/volunteer/appeal/{$appeal_id}", // fragment
+    "/volunteer/appeal/{$opp['appeal_id']}", // fragment
     TRUE, // htmlize?
     TRUE // is frontend?
   );
-
-  return $appeal_url;
 }
 
 /**
