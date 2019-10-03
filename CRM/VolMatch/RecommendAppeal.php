@@ -26,7 +26,7 @@ class CRM_VolMatch_RecommendAppeal {
       array('name' => 'volunteer_beneficiary', 'return' => 'value')
     );
     
-    $select = array('appeals' => array('id', 'title'), 'orgs' => array('id as `beneficiary_id`', '`display_name` as `beneficiary`'), 'civicrm_volunteer_project_contact' => array('project_id'));
+    $select = array('appeals' => array('`id` as `appeal_id`', '`title` as `appeal_title`', '`appeal_teaser`', '`appeal_description` as `description`'), 'orgs' => array('`id` as `beneficiary_id`', '`display_name` as `beneficiary`'), 'civicrm_volunteer_project_contact' => array('project_id'));
 
     $joins = array();
 
